@@ -1,0 +1,134 @@
+openapi: "3.0.0"
+info:
+  title: Creo API
+  version: 1.0.0
+servers:
+  - url: http://api-app.localhost/api/v1
+    description: Local server
+paths:
+  /domains:
+    post:
+      security:
+        - bearerAuth: [ ]
+      summary: Create domain.
+      tags:
+        - Domains
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDomain'
+      responses:
+        '200':
+          description: |-
+            Succes response
+          content:
+            application/json:
+              examples:
+                "Default Response":
+                  value: {
+                    "id": 1,
+                    "message": "Some message...",
+                    "user": {
+                      "id": 1,
+                      "name": "User name",
+                      "email": "user@email.com",
+                      "avatar": "https://..."
+                    },
+                    "files": [],
+                    "created_at": "2022-06-08 20:10:10"
+                  }
+        401:
+          $ref: '#/components/schemas/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/schemas/responses/ForbiddenError'
+        405:
+          $ref: '#/components/schemas/responses/MethodNotAllowedError'
+        500:
+          $ref: '#/components/schemas/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    responses:
+      NotFoundError:
+        description: Not Found Error
+        content:
+          application/json:
+            example:
+              {
+                "message": "Not Found",
+              }
+      UnauthorizedError:
+        description: Authentication information is missing or invalid
+        content:
+          application/json:
+            example:
+              {
+                "message": "Unauthorised",
+              }
+      ForbiddenError:
+        description: Forbidden Error
+        content:
+          application/json:
+            example:
+              {
+                "message": "This action is unauthorized.",
+              }
+      InternalServerError:
+        description: Internal Server Error
+        content:
+          application/json:
+            example:
+              {
+                "message": "Something went wrong",
+              }
+      MethodNotAllowedError:
+        description: Method Not Allowed Error
+        content:
+          application/json:
+            example:
+                {
+                  "message": "The method is not supported for this route.",
+                }
+      BadRequestError:
+        description: Bad Request Error
+        content:
+          application/json:
+            example:
+                {
+                  "message": "Error Description",
+                }
+      ValidationError:
+        description: Validation Error
+        content:
+          application/json:
+            example:
+              {
+                "message": "The given data was invalid.",
+                "errors": {
+                  "field": [
+                    "Error Description"
+                  ]
+                }
+              }
+    CreateDomain:
+      properties:
+        target_domains:
+          type: string
+          example: {
+            "1": "moz.com",
+            "2": "ahrefs.com",
+          }
+          required: true
+        excluded_targets:
+          type: string
+          example: [
+            'semrush.com'
+          ]
+          required: false

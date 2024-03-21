@@ -1,0 +1,28 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Creo API",
+        "contact": {
+            "email": "info@yeagger.com"
+        },
+        "version": "0.1"
+    },
+    "servers": [
+        {
+            "url": "https://api-app.localhost/api/",
+            "description": "Learning env"
+        }
+    ],
+    "paths": {
+        "/profiles": {
+            "get": {
+                "operationId": "92b8337efc1cb030099e7a495635745f",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        }
+    }
+}
