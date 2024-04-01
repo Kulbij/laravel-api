@@ -29,8 +29,17 @@ class CreateDomainRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'target_domains' => 'required',
-            'excluded_targets',
+            'target_domains' => 'required|array',
+            'target_domains.*' => [
+                'required',
+                'regex:/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i',
+            ],
+            
+            'excluded_targets' => 'required',
+            'excluded_targets.*' => [
+                'required',
+                'regex:/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i',
+            ],
         ];
     }
 
@@ -40,7 +49,8 @@ class CreateDomainRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'target_domains.required' => 'Required domain field.',
+            'target_domains.required' => 'Required target domains field.',
+            'excluded_targets.required' => 'Required excluded targets field.',
         ];
     }
 }

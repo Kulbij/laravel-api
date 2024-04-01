@@ -84,6 +84,8 @@ class DomainHandler
                 $createdDomains->push($domain);
             }
 
+            // \Log::info([$createdDomains->toArray()]);
+
             return $createdDomains;
         } catch (RequestException $exception) {
             throw new DomainCreateException($exception->getMessage());
@@ -102,15 +104,28 @@ class DomainHandler
      */
     private function checkResponseStatusCode(stdClass $response): void
     {
-        if (self::SUCCESS_STATUS_CODE === $response->status_code) {
-            Redis::set('status', 'success');
+        foreach ($response->tasks as $taskIndex => $task) {
+            if (self::SUCCESS_STATUS_CODE === $task->status_code) {
+                Redis::set('status', 'success');
+                Redis::set('message', 'ok');
+
+                return;
+            }
+
+            $status = Status::findByCode($task->status_code);
+
+            Redis::set('status', 'error');
+            Redis::set('message', $status->message);
+
+            throw new CheckStatusCodeException($status->message);
 
             return;
         }
 
-        $status = Status::findByCode($response->status_code);
+        Redis::set('status', 'success');
+        Redis::set('message', 'ok');
 
-        throw new CheckStatusCodeException($status->message);
+        return;
     }
 
     /**
@@ -123,7 +138,7 @@ class DomainHandler
         $data[] = [
             'targets' => $dto->getTargetDomains(),
             'exclude_targets' => $dto->getExcludedTargets(),
-            'limit' => 5,
+            'limit' => 10,
             'include_subdomains' => false,
             'exclude_internal_backlinks' => true,
             'order_by' => [
@@ -146,6 +161,10 @@ class DomainHandler
         $intersectionData = [];
 
         foreach ($response->tasks as $taskIndex => $task) {
+            if (null === $task->result) {
+                continue;
+            }
+
             foreach ($task->result as $result) {
                 foreach ($result->items as $index => $item) {
                     foreach ($item->domain_intersection as $intersectionIndex => $intersection) {
@@ -171,7 +190,10 @@ class DomainHandler
      */
     private function getIntersectionsByIndex(array $intersectionsData, int $index): array
     {
-        $intersections = array_shift($intersectionsData);
+        if (!$intersections = array_shift($intersectionsData)) {
+            return [];
+        }
+
         $data = [];
 
         foreach ($intersections as $intersection) {

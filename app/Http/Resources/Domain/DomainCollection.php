@@ -14,7 +14,7 @@ class DomainCollection extends ResourceCollection
     {
         return [
             'data' => $this->collection,
-            'message' => Redis::get('status'),
+            'message' => Redis::get('message'),
 			'type' => Redis::get('status'),
         ];
     }
